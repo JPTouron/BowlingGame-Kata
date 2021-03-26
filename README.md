@@ -2,6 +2,8 @@
 
 http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata
 
+**check the Bowling Game Kata.ppt file in this branch**
+
 ## Bob Martin's problem statement
 
 The game consists of 10 frames as shown above (see PPT). In each frame the player has
