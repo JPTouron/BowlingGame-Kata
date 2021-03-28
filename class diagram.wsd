@@ -1,0 +1,113 @@
+@startuml "Bowling game class diagram"
+
+title "Bowling game class diagram"
+
+package Bowling{
+
+    class Player{
+        +string Name
+    }
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    enum PlayType{
+        +Spare
+        +Strike
+        +Regular
+    }
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    interface KnockedPinsOnTry{
+        +int TryNumber
+        +int KnockedDownPins
+    }
+
+    class PlayTry{        
+        +int TryNumber
+        +<b>ctor (int tryNumber)</b>
+        +bool HasBeenAttempted
+        +void SetKnockedDownPins(int pins)
+        +int KnockedDownPins
+    }
+    note right
+        HasBeenAttempted initializes as false
+        SetKnockDownPins() => HasBeenAttempted = true -> throw if it's already true
+    end note
+    KnockedPinsOnTry<|-up-PlayTry
+
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    abstract class FrameBase{
+        #IList<PlayTry> tries
+        #FrameBase previousFrame
+        +<b>ctor (int frameNumber)</b>
+
+        +PlayType PlayType
+        +int Number
+        +int AvailablePins => 10
+        +int Score()
+        
+        ~IReadOnlyList<KnockedPinsOnTry> KnockedDownPins()
+        #void Roll(int pins);
+    }
+    note left
+        ""tries"" may contain 3 or 2 elements depending on the type of frame
+        ""Roll()"" is overriden in children to set value of pins within proper tries
+        ""Score()"" returns the score for the frame
+    end note
+    FrameBase o--- FrameBase
+    PlayType *-- FrameBase
+
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    class NormalFrame{
+        -void ValidateRoll()
+        +<b>ctor (int frameNumber)</b>
+        ==
+        +Roll(int pins)
+    }
+    note right
+        //1>= frameNumber && frameNumber<=9//
+        ""Roll()"" validates there's a try available and that the pins amount are within remaining pins
+    end note
+    PlayTry *-up- NormalFrame
+    FrameBase <|--NormalFrame
+
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    class TenthFrame{
+        +<b>ctor (int frameNumber)</b>
+        ==
+        +Roll(int pins)
+    }
+    note left
+        // frameNumber==10 //
+    end note
+    PlayTry *-up- TenthFrame
+    FrameBase <|--TenthFrame
+
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    class Game{
+
+        -Player PlayerOne
+        -Player PlayerTwo
+        -IList<Frame> Frames
+        -Frame currentFrame
+        
+        +<b>ctor (Player p1, Player p2)</b>
+
+        +void Roll(int pins)
+        +int Score()
+        +int GetPotentiallyKnockedDownPins()
+        +IReadOnlyList<Frame> GetFrames()
+    }
+    note left
+        ""Roll()""
+        is called each time the player rolls a ball.  The argument is the number of pins knocked down
+        ""Score()""
+        is called only at the very end of the game.  It returns the total score for that game.
+        ""GetPotentiallyKnockedDownPins()""
+        returns a random number within the available pins for the current frame that can be fed into Roll()
+    end note
+
+    FrameBase *-- Game
+    Player *-- Game
+
+
+}
+
+@enduml
