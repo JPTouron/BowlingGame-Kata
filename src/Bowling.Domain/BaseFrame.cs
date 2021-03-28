@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Bowling.Domain.Frame;
 
 namespace Bowling.Domain
@@ -8,7 +9,7 @@ namespace Bowling.Domain
     {
         protected IList<PlayTry> tries;
 
-        private IDictionary<IPlayTry.PlayTry, int> knockedDownOnTry;
+        protected IDictionary<IPlayTry.PlayTry, int> knockedDownOnTry;
 
         public BaseFrame(int frameNumber)
         {
@@ -17,16 +18,19 @@ namespace Bowling.Domain
             Number = frameNumber;
 
             InitializeKnockedDownPins();
+            InitializePlayTries();
 
             Type = PlayType.Regular;
-            Try = IPlayTry.PlayTry.First;
         }
+
+        protected abstract void InitializePlayTries();
 
         public int AvailablePins => 10;
 
         public int Number { get; }
 
-        public IPlayTry.PlayTry Try { get; private set; }
+        public abstract IPlayTry.PlayTry Try { get; }
+        
 
         public PlayType Type { get; private set; }
 
@@ -36,35 +40,8 @@ namespace Bowling.Domain
         /// </summary>
         private Frame Previous { get; }
 
-        public int KnockedDownOnTry(IPlayTry.PlayTry playTry)
-        {
-            return 0;
-        }
+        public abstract void Roll(int pins);
 
-        public void Roll(int pins)
-        {
-
-            switch (Try)
-            {
-                case IPlayTry.PlayTry.First:
-                    knockedDownOnTry[Try] = pins;
-                    Try = IPlayTry.PlayTry.Second;
-                    break;
-
-                case IPlayTry.PlayTry.Second:
-                    ThrowIfBallWasAlreadyRolledForSecondTryInFrameBelowTenth();
-
-                    if (Number == 10)
-                        Try = IPlayTry.PlayTry.Third;
-
-                    break;
-
-                case IPlayTry.PlayTry.Third:
-                    ThrowIfBallWasAlreadyRolledForThirdTryInFrameTen();
-
-                    break;
-            }
-        }
 
         protected abstract void ValidateFrameNumber(int frameNumber);
 
@@ -80,16 +57,5 @@ namespace Bowling.Domain
             knockedDownOnTry = new Dictionary<IPlayTry.PlayTry, int>(knockDownValues);
         }
 
-        private void ThrowIfBallWasAlreadyRolledForSecondTryInFrameBelowTenth()
-        {
-            if (Try == IPlayTry.PlayTry.Second && Number < 10)
-                throw new InvalidOperationException($"Cannot roll ball again on frame #{Number}. You already rolled both your tries.");
-        }
-
-        private void ThrowIfBallWasAlreadyRolledForThirdTryInFrameTen()
-        {
-            if (Try == IPlayTry.PlayTry.Third && Number == 10)
-                throw new InvalidOperationException($"Cannot roll ball again on frame #{Number}. You already rolled your three tries.");
-        }
     }
 }

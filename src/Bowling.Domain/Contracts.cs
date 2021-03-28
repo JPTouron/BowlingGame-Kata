@@ -60,8 +60,6 @@ namespace Bowling.Domain
 
         void Roll(int pins);
 
-        int KnockedDownOnTry(IPlayTry.PlayTry playTry);
-
 
 
     }
@@ -69,6 +67,7 @@ namespace Bowling.Domain
     public interface IPlayTry { 
         public enum PlayTry
         {
+            None=0, 
             First=1,
             Second=2,
             Third=3
