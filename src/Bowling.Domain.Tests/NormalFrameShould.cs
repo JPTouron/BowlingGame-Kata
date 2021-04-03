@@ -10,7 +10,7 @@ namespace Bowling.Domain.Tests
     {
         public class BeCreated
         {
-            private Frame sut;
+            private NormalFrame sut;
 
             [Fact]
             public void AsARegularPlayType()
@@ -47,7 +47,7 @@ namespace Bowling.Domain.Tests
             {
                 sut = Utils.BuildNormalFrame();
 
-                var tries = sut.GetKnockedDownPinsPerTry();
+                var tries = sut.GetAllKnockedDownPinsPerTry();
                 var expectedKnockedDownPins = 0;
 
                 var @try = tries.Single(x => x.TryNumber == 1);
@@ -79,7 +79,7 @@ namespace Bowling.Domain.Tests
             {
                 sut = Utils.BuildNormalFrame();
 
-                var tries = sut.GetKnockedDownPinsPerTry();
+                var tries = sut.GetAllKnockedDownPinsPerTry();
 
                 var expectedTries = 2;
                 Assert.Equal(expectedTries, tries.Count);
@@ -88,14 +88,14 @@ namespace Bowling.Domain.Tests
 
         public class IncreasePlayTry
         {
-            private Frame sut;
+            private NormalFrame sut;
 
             [Fact]
             public void IncreasePlayTryAfterBallIsRolled()
             {
                 sut = Utils.BuildNormalFrame();
 
-                var pinsKnockedByRoll = Utils.GetRandomPinsToKnockDown(sut);
+                var pinsKnockedByRoll = Utils.GetRandomPinsToKnockDown(sut.RemainingPins);
 
                 sut.Roll(pinsKnockedByRoll);
                 Assert.Equal(IPlayTry.PlayTry.Second, sut.Try);
@@ -106,15 +106,15 @@ namespace Bowling.Domain.Tests
             {
                 sut = Utils.BuildNormalFrame();
 
-                int pinsKnockedByRoll = sut.RollSomePinsDown();
-
+                var totalRollsToUse = 2;
+                
+                int pinsKnockedByRoll = sut.RollSomePinsDown(totalRollsToUse);
                 var expectedFirstTry = new { tryNumber = 1, knockedPins = pinsKnockedByRoll };
-
-                pinsKnockedByRoll = sut.RollSomePinsDown();
-
+                
+                pinsKnockedByRoll = sut.RollSomePinsDown(totalRollsToUse);
                 var expectedSecondTry = new { tryNumber = 2, knockedPins = pinsKnockedByRoll };
 
-                var tries = sut.GetKnockedDownPinsPerTry();
+                var tries = sut.GetAllKnockedDownPinsPerTry();
 
                 var firstTry = tries.Single(x => x.TryNumber == expectedFirstTry.tryNumber);
                 var secondTry = tries.Single(x => x.TryNumber == expectedSecondTry.tryNumber);
@@ -136,11 +136,11 @@ namespace Bowling.Domain.Tests
 
                 sut.RollSomePinsDown(totalRollingTries);
 
-                var knockedDownOnSecondRoll = sut.GetKnockedDownPinsPerTry();
+                var knockedDownOnSecondRoll = sut.GetAllKnockedDownPinsPerTry();
 
                 sut.RollSomePinsDown(totalRollingTries);
 
-                var knockedDownOnThirdRoll = sut.GetKnockedDownPinsPerTry();
+                var knockedDownOnThirdRoll = sut.GetAllKnockedDownPinsPerTry();
 
                 Assert.Equal(knockedDownOnSecondRoll, knockedDownOnThirdRoll);
             }
