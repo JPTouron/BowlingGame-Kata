@@ -1,10 +1,12 @@
 ﻿using Ardalis.GuardClauses;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Bowling.Domain
 {
+    public interface Player
+    {
+        string Name { get; }
+    }
+
     public class APlayer : Player
     {
         public APlayer(string name)

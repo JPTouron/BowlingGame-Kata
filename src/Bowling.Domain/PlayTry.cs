@@ -3,6 +3,17 @@ using System;
 
 namespace Bowling.Domain
 {
+    public interface IPlayTry
+    {
+        public enum PlayTry
+        {
+            None = 0,
+            First = 1,
+            Second = 2,
+            Third = 3
+        }
+    }
+
     public interface KnockedPinsOnTry
     {
         int KnockedDownPins { get; }

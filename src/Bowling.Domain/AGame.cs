@@ -1,15 +1,39 @@
-﻿using System;
+﻿using Bowling.Domain.Frames.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Bowling.Domain
 {
+    public interface Game
+    {
+        string PlayerOne { get; }
+
+        string PlayerTwo { get; }
+
+        /// <summary>
+        /// maybe private
+        /// </summary>
+        IReadOnlyList<Frame> PlayerFrames(Player player);
+
+        /// <summary>
+        /// is called each time the player rolls a ball.  The argument is the number of pins knocked down
+        /// </summary>
+        void Roll(int pins);
+
+        /// <summary>
+        /// is called only at the very end of the game.  It returns the total score for that game.
+        /// </summary>
+        int Score();
+    }
 
     internal class AGame : Game
     {
         private APlayer p1;
         private APlayer p2;
 
+        private IList<Frame> p1Frames;
+        private IList<Frame> p2Frames;
 
         public AGame(APlayer p1, APlayer p2)
         {
@@ -17,31 +41,18 @@ namespace Bowling.Domain
             this.p2 = p2;
 
             InitializeFrames();
-
-        }
-        IList<Frame> p1Frames;
-        IList<Frame> p2Frames;
-        private void InitializeFrames()
-        {
-            p1Frames = new List<Frame>();
-            p2Frames = new List<Frame>();
-
-
         }
 
         public string PlayerOne => p1.Name;
+
         public string PlayerTwo => p2.Name;
 
         public IReadOnlyList<Frame> PlayerFrames(Player player)
         {
-
-
-
             if (player.Name == p1.Name)
                 return p1Frames.ToList();
             if (player.Name == p2.Name)
                 return p2Frames.ToList();
-
 
             throw new ArgumentException("There is no player with the name supplied");
         }
@@ -54,6 +65,12 @@ namespace Bowling.Domain
         public int Score()
         {
             throw new NotImplementedException();
+        }
+
+        private void InitializeFrames()
+        {
+            p1Frames = new List<Frame>();
+            p2Frames = new List<Frame>();
         }
     }
 }

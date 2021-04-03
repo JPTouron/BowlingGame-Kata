@@ -40,10 +40,10 @@ package Bowling{
 
         +PlayType PlayType
         +int Number
-        +int AvailablePins => 10
+        +int RemainingPins => 10
         +int Score()
         
-        ~IReadOnlyList<KnockedPinsOnTry> KnockedDownPins()
+        ~IReadOnlyList<KnockedPinsOnTry> GetKnockedDownPinsPerTry()
         #void Roll(int pins);
     }
     note left
