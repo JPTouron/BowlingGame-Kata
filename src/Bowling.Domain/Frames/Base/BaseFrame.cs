@@ -11,12 +11,14 @@ namespace Bowling.Domain.Frames.Base
     /// </summary>
     public interface Frame
     {
-        public enum PlayType
+        public enum FrameType
         {
             Spare,
             Strike,
             Regular
         }
+
+        bool HasTriesLeft { get; }
 
         int Number { get; }
 
@@ -24,7 +26,7 @@ namespace Bowling.Domain.Frames.Base
 
         IPlayTry.PlayTry Try { get; }
 
-        PlayType Type { get; }
+        FrameType Type { get; }
 
         IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry();
 
@@ -45,10 +47,12 @@ namespace Bowling.Domain.Frames.Base
 
             SortTriesByNumber();
 
-            Type = PlayType.Regular;
+            Type = FrameType.Regular;
 
             RemainingPins = 10;
         }
+
+        public abstract bool HasTriesLeft { get; }
 
         public int Number { get; }
 
@@ -56,7 +60,7 @@ namespace Bowling.Domain.Frames.Base
 
         public abstract IPlayTry.PlayTry Try { get; }
 
-        public PlayType Type { get; private set; }
+        public FrameType Type { get; private set; }
 
         /// <summary>
         /// this field is so the current frame can pass into the prev frame the results of each try on this frame

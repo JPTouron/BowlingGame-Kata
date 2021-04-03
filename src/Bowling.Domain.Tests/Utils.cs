@@ -18,12 +18,6 @@ namespace Bowling.Domain.Tests
             return GetRandomNumberBetween(0, remaining);
         }
 
-        //public static int GetRandomPinsToKnockDown(int remainingPinsOverride = 0, int remainingPins = 10)
-        //{
-        //    var remaining = remainingPinsOverride == 0 ? remainingPins : remainingPinsOverride;
-        //    return GetRandomNumberBetween(0, remaining);
-        //}
-
         public static int RollSomePinsDown(this Rollable sut, int totalRollsToUse = 1, int remainingPins = 10, int? pinsToKnockDown = null)
         {
             var pinsKnockedByRoll = pinsToKnockDown ?? GetRandomPinsToKnockDown(remainingPins / totalRollsToUse);

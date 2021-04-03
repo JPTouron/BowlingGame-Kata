@@ -71,14 +71,29 @@ namespace Bowling.Domain
 
         public void Roll(int pins)
         {
-            Frame f;
-
-            if (!AsStack(p1Frames).TryPop(out f))
-                f = new NormalFrame(1);
+            Frame f = GetFrame();
 
             AsRollable(f).Roll(pins);
             AsStack(p1Frames).Push(f);
 
+        }
+
+
+        private Frame GetFrame()
+        {
+
+            var stack = AsStack(p1Frames);
+            var currentFrameNumber = stack.Count;
+            if (stack.TryPeek(out var f))
+            {
+
+                if (f.HasTriesLeft)
+                    return stack.Pop();
+                else
+                    return new NormalFrame(currentFrameNumber + 1);
+            }
+
+            return new NormalFrame(1);
 
         }
 

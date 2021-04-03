@@ -27,6 +27,8 @@ namespace Bowling.Domain.Frames
             }
         }
 
+        public override bool HasTriesLeft => !AllTriesHaveBeenAttempted();
+
         protected override void RollInternal(int pins)
         {
             PlayTry attempt;
@@ -34,15 +36,20 @@ namespace Bowling.Domain.Frames
             switch (Try)
             {
                 case IPlayTry.PlayTry.First:
-                    attempt = tries.Single(x => x.TryNumber == (int)IPlayTry.PlayTry.First);
+                    attempt = GetTry(IPlayTry.PlayTry.First);
                     attempt.SetKnockedDownPins(pins);
                     break;
 
                 case IPlayTry.PlayTry.Second:
-                    attempt = tries.Single(x => x.TryNumber == (int)IPlayTry.PlayTry.Second);
+                    attempt = GetTry(IPlayTry.PlayTry.Second);
                     attempt.SetKnockedDownPins(pins);
                     break;
             }
+        }
+
+        private PlayTry GetTry(IPlayTry.PlayTry playTry)
+        {
+            return tries.Single(x => x.TryNumber == (int)playTry);
         }
 
         protected override void InitializePlayTries()
@@ -57,7 +64,7 @@ namespace Bowling.Domain.Frames
 
         private bool AllTriesHaveBeenAttempted()
         {
-            return tries.Any(x => x.HasBeenAttempted == false) == false;
+            return tries.All(x => x.HasBeenAttempted);
         }
 
         private PlayTry GetNotAttemptedTry()

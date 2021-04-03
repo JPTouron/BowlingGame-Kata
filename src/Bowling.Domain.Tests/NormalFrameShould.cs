@@ -17,7 +17,7 @@ namespace Bowling.Domain.Tests
             {
                 sut = Utils.BuildNormalFrame();
 
-                var expectedType = Frame.PlayType.Regular;
+                var expectedType = Frame.FrameType.Regular;
 
                 Assert.Equal(expectedType, sut.Type);
             }

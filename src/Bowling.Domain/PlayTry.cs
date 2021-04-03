@@ -12,12 +12,12 @@ namespace Bowling.Domain
             Second = 2,
             Third = 3
         }
-
-        
     }
 
     public interface KnockedPinsOnTry
     {
+        public bool HasBeenAttempted { get; }
+
         int KnockedDownPins { get; }
 
         int TryNumber { get; }

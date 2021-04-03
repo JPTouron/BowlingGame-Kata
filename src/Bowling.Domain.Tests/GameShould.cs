@@ -1,3 +1,4 @@
+using Bowling.Domain.Frames;
 using System;
 using System.Linq;
 using Xunit;
@@ -14,7 +15,6 @@ namespace Bowling.Domain.Tests
             var p1 = CreatePlayerOne();
             sut = CreateAGame(p1);
 
-            var expectedPlayType = Frames.Base.Frame.PlayType.Regular;
             var expectedframePlayed = 1;
             var totalAvailablePins = 10;
             var expectedKnockedPins = Utils.GetRandomPinsToKnockDown();
@@ -29,7 +29,6 @@ namespace Bowling.Domain.Tests
 
             var firstFrame = frames.Single(x => x.Number == expectedframePlayed);
 
-            Assert.Equal(expectedPlayType, firstFrame.Type);
             Assert.Equal(expectedRemainingPins, firstFrame.RemainingPins);
             Assert.Equal(expectedKnockedPins, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.First).KnockedDownPins);
         }
@@ -40,7 +39,6 @@ namespace Bowling.Domain.Tests
             var p1 = CreatePlayerOne();
             sut = CreateAGame(p1);
 
-            var expectedPlayType = Frames.Base.Frame.PlayType.Regular;
             var expectedframePlayed = 1;
             var totalAvailablePins = 10;
 
@@ -58,10 +56,67 @@ namespace Bowling.Domain.Tests
 
             var firstFrame = frames.Single(x => x.Number == expectedframePlayed);
 
-            Assert.Equal(expectedPlayType, firstFrame.Type);
             Assert.Equal(expectedRemainingPins, firstFrame.RemainingPins);
             Assert.Equal(pinsKnockedDownOnFirstTry, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.First).KnockedDownPins);
             Assert.Equal(pinsKnockedDownOnSecondTry, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.Second).KnockedDownPins);
+        }
+
+        [Fact]
+        public void ChangeFrameWhenRollingAfterCompletingTwoRollsOnANormalFrame()
+        {
+            var p1 = CreatePlayerOne();
+            sut = CreateAGame(p1);
+
+            var expectedCurrentFrameNumber = 2;
+
+            var totalRollsToUse = 2;
+
+            sut.RollSomePinsDown(totalRollsToUse);
+            sut.RollSomePinsDown(totalRollsToUse);
+            
+            sut.RollSomePinsDown();
+
+            var frames = sut.GetPlayerFrames(p1);
+
+            Assert.Equal(expectedCurrentFrameNumber, frames.Count);
+
+
+        }
+
+        [Fact]
+        public void HavePreviousToCurrentFrameWithTwoTriesAttemptedWhenCurrentFrameIsNormalFrame()
+        {
+            var p1 = CreatePlayerOne();
+            sut = CreateAGame(p1);
+
+
+            var totalFramesToPlay = 9;
+            var framesPlayed = 0;
+            for (int currentFrameNumber = 1; currentFrameNumber <= totalFramesToPlay; currentFrameNumber++)
+            {
+
+                var totalRollsToUse = 2;
+
+                sut.RollSomePinsDown(totalRollsToUse);
+                sut.RollSomePinsDown(totalRollsToUse);
+                framesPlayed++;
+
+                var frames = sut.GetPlayerFrames(p1);
+
+                Assert.IsAssignableFrom<NormalFrame>(frames.Single(x => x.Number == currentFrameNumber));
+
+                if (currentFrameNumber > 1)
+                {
+                    var expectedTotalTries = 2;
+                    var previousFrame = frames.Single(x => x.Number == currentFrameNumber - 1);
+                    var tries = previousFrame.GetAllKnockedDownPinsPerTry();
+
+                    Assert.Equal(expectedTotalTries, tries.Count);
+                    Assert.True(tries.All(x=>x.HasBeenAttempted));
+                }
+                Assert.Equal(framesPlayed, frames.Count);
+            }
+
         }
 
         [Fact]
