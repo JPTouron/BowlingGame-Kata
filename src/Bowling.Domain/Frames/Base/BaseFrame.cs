@@ -18,15 +18,17 @@ namespace Bowling.Domain.Frames.Base
             Regular
         }
 
-        int RemainingPins { get; }
-
         int Number { get; }
+
+        int RemainingPins { get; }
 
         IPlayTry.PlayTry Try { get; }
 
         PlayType Type { get; }
 
-        IReadOnlyList<KnockedPinsOnTry> GetKnockedDownPinsPerTry();
+        IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry();
+
+        KnockedPinsOnTry GetKnockedDownPinsOnTry(IPlayTry.PlayTry playTry);
 
         void Roll(int pins);
     }
@@ -50,9 +52,9 @@ namespace Bowling.Domain.Frames.Base
             RemainingPins = 10;
         }
 
-        public int RemainingPins { get; private set; }
-
         public int Number { get; }
+
+        public int RemainingPins { get; private set; }
 
         public abstract IPlayTry.PlayTry Try { get; }
 
@@ -64,13 +66,24 @@ namespace Bowling.Domain.Frames.Base
         /// </summary>
         private Frame Previous { get; }
 
-        public IReadOnlyList<KnockedPinsOnTry> GetKnockedDownPinsPerTry()
+        public IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry()
         {
             return tries.ToList();
         }
 
-        public  void Roll(int pins) {
+        public KnockedPinsOnTry GetKnockedDownPinsOnTry(IPlayTry.PlayTry playTry)
+        {
+            ValidatePlayTry(playTry);
 
+            var result = tries.Single(x => x.TryNumber == (int)playTry);
+            return result;
+
+        }
+
+        protected abstract void ValidatePlayTry(IPlayTry.PlayTry playTry);
+
+        public void Roll(int pins)
+        {
             Guard.Against.OutOfRange(pins, nameof(pins), 0, RemainingPins);
 
             RollInternal(pins);
@@ -78,8 +91,9 @@ namespace Bowling.Domain.Frames.Base
             RemainingPins -= pins;
         }
 
-        protected abstract void RollInternal(int pins);
         protected abstract void InitializePlayTries();
+
+        protected abstract void RollInternal(int pins);
 
         protected abstract void ValidateFrameNumber(int frameNumber);
 

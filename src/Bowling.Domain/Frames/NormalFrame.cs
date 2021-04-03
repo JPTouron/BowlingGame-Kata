@@ -69,5 +69,10 @@ namespace Bowling.Domain.Frames
         {
             tries = new List<PlayTry> { new PlayTry(1), new PlayTry(2) };
         }
+
+        protected override void ValidatePlayTry(IPlayTry.PlayTry playTry)
+        {
+            Guard.Against.OutOfRange((int)playTry, nameof(playTry), (int)IPlayTry.PlayTry.First, (int)IPlayTry.PlayTry.Second);
+        }
     }
 }

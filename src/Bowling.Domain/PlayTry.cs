@@ -12,6 +12,8 @@ namespace Bowling.Domain
             Second = 2,
             Third = 3
         }
+
+        
     }
 
     public interface KnockedPinsOnTry

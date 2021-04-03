@@ -1,4 +1,5 @@
-﻿using Bowling.Domain.Frames.Base;
+﻿using Bowling.Domain.Frames;
+using Bowling.Domain.Frames.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Bowling.Domain
         /// <summary>
         /// maybe private
         /// </summary>
-        IReadOnlyList<Frame> PlayerFrames(Player player);
+        IReadOnlyList<Frame> GetPlayerFrames(Player player);
 
         /// <summary>
         /// is called each time the player rolls a ball.  The argument is the number of pins knocked down
@@ -29,13 +30,13 @@ namespace Bowling.Domain
 
     internal class AGame : Game
     {
-        private APlayer p1;
-        private APlayer p2;
+        private Player p1;
+        private Player p2;
 
         private IList<Frame> p1Frames;
         private IList<Frame> p2Frames;
 
-        public AGame(APlayer p1, APlayer p2)
+        public AGame(Player p1, Player p2)
         {
             this.p1 = p1;
             this.p2 = p2;
@@ -47,7 +48,7 @@ namespace Bowling.Domain
 
         public string PlayerTwo => p2.Name;
 
-        public IReadOnlyList<Frame> PlayerFrames(Player player)
+        public IReadOnlyList<Frame> GetPlayerFrames(Player player)
         {
             if (player.Name == p1.Name)
                 return p1Frames.ToList();
@@ -59,7 +60,13 @@ namespace Bowling.Domain
 
         public void Roll(int pins)
         {
-            throw new NotImplementedException();
+            var f = new NormalFrame(1);
+
+            f.Roll(pins);
+
+            p1Frames.Add(f);
+                
+
         }
 
         public int Score()
