@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Bowling.Domain
 {
+
     public interface Game
     {
         string PlayerOne { get; }
@@ -18,17 +19,12 @@ namespace Bowling.Domain
         IReadOnlyList<Frame> GetPlayerFrames(Player player);
 
         /// <summary>
-        /// is called each time the player rolls a ball.  The argument is the number of pins knocked down
-        /// </summary>
-        void Roll(int pins);
-
-        /// <summary>
         /// is called only at the very end of the game.  It returns the total score for that game.
         /// </summary>
         int Score();
     }
 
-    internal class AGame : Game
+    internal class AGame : Game,Rollable
     {
         private Player p1;
         private Player p2;

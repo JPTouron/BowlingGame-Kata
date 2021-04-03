@@ -29,11 +29,9 @@ namespace Bowling.Domain.Frames.Base
         IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry();
 
         KnockedPinsOnTry GetKnockedDownPinsOnTry(IPlayTry.PlayTry playTry);
-
-        void Roll(int pins);
     }
 
-    internal abstract class BaseFrame : Frame
+    internal abstract class BaseFrame : Frame, Rollable
     {
         protected IList<PlayTry> tries;
 
@@ -77,10 +75,7 @@ namespace Bowling.Domain.Frames.Base
 
             var result = tries.Single(x => x.TryNumber == (int)playTry);
             return result;
-
         }
-
-        protected abstract void ValidatePlayTry(IPlayTry.PlayTry playTry);
 
         public void Roll(int pins)
         {
@@ -96,6 +91,8 @@ namespace Bowling.Domain.Frames.Base
         protected abstract void RollInternal(int pins);
 
         protected abstract void ValidateFrameNumber(int frameNumber);
+
+        protected abstract void ValidatePlayTry(IPlayTry.PlayTry playTry);
 
         private void SortTriesByNumber()
         {
