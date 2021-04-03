@@ -24,13 +24,28 @@ namespace Bowling.Domain
         int Score();
     }
 
-    internal class AGame : Game,Rollable
+
+    internal class AGame : Game, Rollable
     {
+
+        private Stack<Frame> AsStack(IEnumerable<Frame> frames)
+        {
+
+            return (Stack<Frame>)frames;
+        }
+
+        private Rollable AsRollable(Frame frame)
+        {
+
+            return (Rollable)frame;
+        }
+
         private Player p1;
         private Player p2;
 
-        private IList<Frame> p1Frames;
-        private IList<Frame> p2Frames;
+
+        private IEnumerable<Frame> p1Frames;
+        private IEnumerable<Frame> p2Frames;
 
         public AGame(Player p1, Player p2)
         {
@@ -56,12 +71,14 @@ namespace Bowling.Domain
 
         public void Roll(int pins)
         {
-            var f = new NormalFrame(1);
+            Frame f;
 
-            f.Roll(pins);
+            if (!AsStack(p1Frames).TryPop(out f))
+                f = new NormalFrame(1);
 
-            p1Frames.Add(f);
-                
+            AsRollable(f).Roll(pins);
+            AsStack(p1Frames).Push(f);
+
 
         }
 
@@ -72,8 +89,8 @@ namespace Bowling.Domain
 
         private void InitializeFrames()
         {
-            p1Frames = new List<Frame>();
-            p2Frames = new List<Frame>();
+            p1Frames = new Stack<Frame>();
+            p2Frames = new Stack<Frame>();
         }
     }
 }

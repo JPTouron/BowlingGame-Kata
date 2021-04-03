@@ -19,7 +19,7 @@ namespace Bowling.Domain.Tests
             var totalAvailablePins = 10;
             var expectedKnockedPins = Utils.GetRandomPinsToKnockDown();
             var expectedRemainingPins = totalAvailablePins - expectedKnockedPins;
-            
+
             sut.RollSomePinsDown(pinsToKnockDown: expectedKnockedPins);
 
             var frames = sut.GetPlayerFrames(p1);
@@ -32,6 +32,36 @@ namespace Bowling.Domain.Tests
             Assert.Equal(expectedPlayType, firstFrame.Type);
             Assert.Equal(expectedRemainingPins, firstFrame.RemainingPins);
             Assert.Equal(expectedKnockedPins, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.First).KnockedDownPins);
+        }
+
+        [Fact]
+        public void RollPinsTwiceAndUpdateFrameWithRolledData()
+        {
+            var p1 = CreatePlayerOne();
+            sut = CreateAGame(p1);
+
+            var expectedPlayType = Frames.Base.Frame.PlayType.Regular;
+            var expectedframePlayed = 1;
+            var totalAvailablePins = 10;
+
+            var pinsKnockedDownOnFirstTry = Utils.GetRandomPinsToKnockDown(7);
+            var pinsKnockedDownOnSecondTry = Utils.GetRandomPinsToKnockDown(3);
+            var expectedRemainingPins = totalAvailablePins - pinsKnockedDownOnFirstTry - pinsKnockedDownOnSecondTry;
+
+            sut.RollSomePinsDown(pinsToKnockDown: pinsKnockedDownOnFirstTry);
+            sut.RollSomePinsDown(pinsToKnockDown: pinsKnockedDownOnSecondTry);
+
+            var frames = sut.GetPlayerFrames(p1);
+
+            Assert.NotNull(frames);
+            Assert.NotNull(frames.Single(x => x.Number == expectedframePlayed));
+
+            var firstFrame = frames.Single(x => x.Number == expectedframePlayed);
+
+            Assert.Equal(expectedPlayType, firstFrame.Type);
+            Assert.Equal(expectedRemainingPins, firstFrame.RemainingPins);
+            Assert.Equal(pinsKnockedDownOnFirstTry, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.First).KnockedDownPins);
+            Assert.Equal(pinsKnockedDownOnSecondTry, firstFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.Second).KnockedDownPins);
         }
 
         [Fact]
