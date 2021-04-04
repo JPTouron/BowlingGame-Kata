@@ -11,7 +11,6 @@ namespace Bowling.Domain.Frames.Base
     /// </summary>
     public interface Frame
     {
-        //JP: TEST THIS
         public enum FrameType
         {
             Spare,
@@ -39,6 +38,7 @@ namespace Bowling.Domain.Frames.Base
         void Roll(int pins);
     }
 
+    //JP: program the tenth frame!
     internal abstract class BaseFrame : Frame
     {
         protected IList<PlayTry> tries;
@@ -94,6 +94,8 @@ namespace Bowling.Domain.Frames.Base
             RollInternal(pins);
 
             RemainingPins -= pins;
+
+            UpdateFrameTypeIfApplicable();
         }
 
         protected abstract void InitializePlayTries();
@@ -107,6 +109,14 @@ namespace Bowling.Domain.Frames.Base
         private void SortTriesByNumber()
         {
             tries = tries.OrderBy(x => x.TryNumber).ToList();
+        }
+
+        private void UpdateFrameTypeIfApplicable()
+        {
+            if (RemainingPins == 0 && HasTriesLeft == true)
+                Type = FrameType.Strike;
+            else if (RemainingPins == 0 && HasTriesLeft == false)
+                Type = FrameType.Spare;
         }
     }
 }

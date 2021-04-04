@@ -8,6 +8,47 @@ namespace Bowling.Domain.Tests
 {
     public class NormalFrameShould
     {
+        private NormalFrame sut;
+
+        [Fact]
+        public void HaveARegularFrameTypeWhenNotAllPinsAreTakenInTwoTries()
+        {
+            sut = Utils.BuildNormalFrame();
+
+            var pinsKnockedByRoll = Utils.GetRandomPinsToKnockDown(3);
+            sut.Roll(pinsKnockedByRoll);
+
+            pinsKnockedByRoll = Utils.GetRandomPinsToKnockDown(6);
+            sut.Roll(pinsKnockedByRoll);
+
+            Assert.Equal(Frame.FrameType.Regular, sut.Type);
+        }
+
+        [Fact]
+        public void HaveASpareFrameTypeWhenAllPinsAreTakenInTwoTries()
+        {
+            sut = Utils.BuildNormalFrame();
+
+            var pinsKnockedByRoll = Utils.GetPinsToKnockDown(pinsToKnockDown: 3);
+            sut.Roll(pinsKnockedByRoll);
+
+            pinsKnockedByRoll = Utils.GetPinsToKnockDown(pinsToKnockDown: 7);
+            sut.Roll(pinsKnockedByRoll);
+
+            Assert.Equal(Frame.FrameType.Spare, sut.Type);
+        }
+
+        [Fact]
+        public void HaveAStrikeFrameTypeWhenAllPinsAreTakenInTheFirstTry()
+        {
+            sut = Utils.BuildNormalFrame();
+
+            var pinsKnockedByRoll = Utils.GetPinsToKnockDown(pinsToKnockDown: 10);
+            sut.Roll(pinsKnockedByRoll);
+
+            Assert.Equal(Frame.FrameType.Strike, sut.Type);
+        }
+
         public class BeCreated
         {
             private NormalFrame sut;
