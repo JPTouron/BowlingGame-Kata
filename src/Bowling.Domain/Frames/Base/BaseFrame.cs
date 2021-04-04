@@ -11,6 +11,7 @@ namespace Bowling.Domain.Frames.Base
     /// </summary>
     public interface Frame
     {
+        //JP: TEST THIS
         public enum FrameType
         {
             Spare,
@@ -31,9 +32,14 @@ namespace Bowling.Domain.Frames.Base
         IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry();
 
         KnockedPinsOnTry GetKnockedDownPinsOnTry(IPlayTry.PlayTry playTry);
+
+        /// <summary>
+        /// is called each time the player rolls a ball.  The argument is the number of pins knocked down
+        /// </summary>
+        void Roll(int pins);
     }
 
-    internal abstract class BaseFrame : Frame, Rollable
+    internal abstract class BaseFrame : Frame
     {
         protected IList<PlayTry> tries;
 

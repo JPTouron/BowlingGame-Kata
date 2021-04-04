@@ -14,6 +14,8 @@ namespace Bowling.Domain.Frames
         {
         }
 
+        public override bool HasTriesLeft => !AllTriesHaveBeenAttempted();
+
         public override IPlayTry.PlayTry Try
         {
             get
@@ -27,7 +29,10 @@ namespace Bowling.Domain.Frames
             }
         }
 
-        public override bool HasTriesLeft => !AllTriesHaveBeenAttempted();
+        protected override void InitializePlayTries()
+        {
+            InitializeWithTwoTries();
+        }
 
         protected override void RollInternal(int pins)
         {
@@ -47,19 +52,14 @@ namespace Bowling.Domain.Frames
             }
         }
 
-        private PlayTry GetTry(IPlayTry.PlayTry playTry)
-        {
-            return tries.Single(x => x.TryNumber == (int)playTry);
-        }
-
-        protected override void InitializePlayTries()
-        {
-            InitializeWithTwoTries();
-        }
-
         protected override void ValidateFrameNumber(int frameNumber)
         {
             Guard.Against.OutOfRange(frameNumber, nameof(frameNumber), minimumFrameNumber, maximumFrameNumber);
+        }
+
+        protected override void ValidatePlayTry(IPlayTry.PlayTry playTry)
+        {
+            Guard.Against.OutOfRange((int)playTry, nameof(playTry), (int)IPlayTry.PlayTry.First, (int)IPlayTry.PlayTry.Second);
         }
 
         private bool AllTriesHaveBeenAttempted()
@@ -72,14 +72,14 @@ namespace Bowling.Domain.Frames
             return tries.First(x => x.HasBeenAttempted == false);
         }
 
+        private PlayTry GetTry(IPlayTry.PlayTry playTry)
+        {
+            return tries.Single(x => x.TryNumber == (int)playTry);
+        }
+
         private void InitializeWithTwoTries()
         {
             tries = new List<PlayTry> { new PlayTry(1), new PlayTry(2) };
-        }
-
-        protected override void ValidatePlayTry(IPlayTry.PlayTry playTry)
-        {
-            Guard.Against.OutOfRange((int)playTry, nameof(playTry), (int)IPlayTry.PlayTry.First, (int)IPlayTry.PlayTry.Second);
         }
     }
 }

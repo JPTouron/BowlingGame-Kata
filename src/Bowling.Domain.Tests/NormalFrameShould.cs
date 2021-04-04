@@ -107,12 +107,16 @@ namespace Bowling.Domain.Tests
                 sut = Utils.BuildNormalFrame();
 
                 var totalRollsToUse = 2;
-                
-                int pinsKnockedByRoll = sut.RollSomePinsDown(totalRollsToUse);
-                var expectedFirstTry = new { tryNumber = 1, knockedPins = pinsKnockedByRoll };
-                
-                pinsKnockedByRoll = sut.RollSomePinsDown(totalRollsToUse);
-                var expectedSecondTry = new { tryNumber = 2, knockedPins = pinsKnockedByRoll };
+
+                var pinsKnockedDownByRoll = Utils.GetPinsToKnockDown(totalRollsToUse);
+                sut.Roll(pinsKnockedDownByRoll);
+
+                var expectedFirstTry = new { tryNumber = 1, knockedPins = pinsKnockedDownByRoll };
+
+                pinsKnockedDownByRoll = Utils.GetPinsToKnockDown(totalRollsToUse);
+                sut.Roll(pinsKnockedDownByRoll);
+
+                var expectedSecondTry = new { tryNumber = 2, knockedPins = pinsKnockedDownByRoll };
 
                 var tries = sut.GetAllKnockedDownPinsPerTry();
 
@@ -132,13 +136,16 @@ namespace Bowling.Domain.Tests
 
                 var totalRollingTries = 3;
 
-                sut.RollSomePinsDown(totalRollingTries);
+                var pinsKnockedDownByRoll = Utils.GetPinsToKnockDown(totalRollingTries);
+                sut.Roll(pinsKnockedDownByRoll);
 
-                sut.RollSomePinsDown(totalRollingTries);
+                pinsKnockedDownByRoll = Utils.GetPinsToKnockDown(totalRollingTries);
+                sut.Roll(pinsKnockedDownByRoll);
 
                 var knockedDownOnSecondRoll = sut.GetAllKnockedDownPinsPerTry();
 
-                sut.RollSomePinsDown(totalRollingTries);
+                pinsKnockedDownByRoll = Utils.GetPinsToKnockDown(totalRollingTries);
+                sut.Roll(pinsKnockedDownByRoll);
 
                 var knockedDownOnThirdRoll = sut.GetAllKnockedDownPinsPerTry();
 

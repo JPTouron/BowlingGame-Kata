@@ -5,6 +5,12 @@ namespace Bowling.Domain.Tests
 {
     public static class Utils
     {
+        public static int GetPinsToKnockDown(int totalRollsToUse = 1, int remainingPins = 10, int? pinsToKnockDown = null)
+        {
+            var pinsKnockedByRoll = pinsToKnockDown ?? GetRandomPinsToKnockDown(remainingPins / totalRollsToUse);
+            return pinsKnockedByRoll;
+        }
+
         public static int GetRandomNumberBetween(int min, int max)
         {
             var r = new Random();
@@ -16,13 +22,6 @@ namespace Bowling.Domain.Tests
         {
             var remaining = remainingPinsOverride ?? 0;
             return GetRandomNumberBetween(0, remaining);
-        }
-
-        public static int RollSomePinsDown(this Rollable sut, int totalRollsToUse = 1, int remainingPins = 10, int? pinsToKnockDown = null)
-        {
-            var pinsKnockedByRoll = pinsToKnockDown ?? GetRandomPinsToKnockDown(remainingPins / totalRollsToUse);
-            sut.Roll(pinsKnockedByRoll);
-            return pinsKnockedByRoll;
         }
 
         internal static NormalFrame BuildNormalFrame()

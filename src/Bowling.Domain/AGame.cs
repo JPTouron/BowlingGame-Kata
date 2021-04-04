@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace Bowling.Domain
 {
-
     public interface Game
     {
         string PlayerOne { get; }
@@ -19,33 +18,23 @@ namespace Bowling.Domain
         IReadOnlyList<Frame> GetPlayerFrames(Player player);
 
         /// <summary>
+        /// is called each time the player rolls a ball.  The argument is the number of pins knocked down
+        /// </summary>
+        void Roll(Player player, int pins);
+
+        /// <summary>
         /// is called only at the very end of the game.  It returns the total score for that game.
         /// </summary>
         int Score();
     }
 
-
-    internal class AGame : Game, Rollable
+    internal class AGame : Game
     {
-
-        private Stack<Frame> AsStack(IEnumerable<Frame> frames)
-        {
-
-            return (Stack<Frame>)frames;
-        }
-
-        private Rollable AsRollable(Frame frame)
-        {
-
-            return (Rollable)frame;
-        }
-
         private Player p1;
+
         private Player p2;
 
-
-        private IEnumerable<Frame> p1Frames;
-        private IEnumerable<Frame> p2Frames;
+        private IDictionary<Player, IEnumerable<Frame>> playerFrames;
 
         public AGame(Player p1, Player p2)
         {
@@ -62,50 +51,55 @@ namespace Bowling.Domain
         public IReadOnlyList<Frame> GetPlayerFrames(Player player)
         {
             if (player.Name == p1.Name)
-                return p1Frames.ToList();
+                return playerFrames[player].ToList();
+
             if (player.Name == p2.Name)
-                return p2Frames.ToList();
+                return playerFrames[player].ToList();
 
-            throw new ArgumentException("There is no player with the name supplied");
+            throw new ArgumentException("No player in the game matches the player you supplied");
         }
 
-        public void Roll(int pins)
+        public void Roll(Player player, int pins)
         {
-            Frame f = GetFrame();
+            Frame f = GetFrame(player);
 
-            AsRollable(f).Roll(pins);
-            AsStack(p1Frames).Push(f);
-
-        }
-
-
-        private Frame GetFrame()
-        {
-
-            var stack = AsStack(p1Frames);
-            var currentFrameNumber = stack.Count;
-            if (stack.TryPeek(out var f))
-            {
-
-                if (f.HasTriesLeft)
-                    return stack.Pop();
-                else
-                    return new NormalFrame(currentFrameNumber + 1);
-            }
-
-            return new NormalFrame(1);
-
+            f.Roll(pins);
+            AsStack(player).Push(f);
         }
 
         public int Score()
         {
+            //JP: TEST THIS
             throw new NotImplementedException();
+        }
+
+        private Stack<Frame> AsStack(Player player)
+        {
+            return (Stack<Frame>)playerFrames[player];
+        }
+
+        private Frame GetFrame(Player player)
+        {
+            var stack = AsStack(player);
+            var currentFrameNumber = stack.Count;
+
+            if (stack.TryPeek(out var f))
+            {
+                if (f.HasTriesLeft)
+                    return stack.Pop();
+            }
+
+            return new NormalFrame(currentFrameNumber + 1);
         }
 
         private void InitializeFrames()
         {
-            p1Frames = new Stack<Frame>();
-            p2Frames = new Stack<Frame>();
+            var p1Frames = new KeyValuePair<Player, IEnumerable<Frame>>(p1, new Stack<Frame>());
+            var p2Frames = new KeyValuePair<Player, IEnumerable<Frame>>(p2, new Stack<Frame>());
+
+            playerFrames = new Dictionary<Player, IEnumerable<Frame>>();
+            playerFrames.Add(p1Frames);
+            playerFrames.Add(p2Frames);
         }
     }
 }
