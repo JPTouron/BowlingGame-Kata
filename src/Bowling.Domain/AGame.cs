@@ -25,7 +25,7 @@ namespace Bowling.Domain
         /// <summary>
         /// is called only at the very end of the game.  It returns the total score for that game.
         /// </summary>
-        int Score();
+        int CalculateScoreFor(Player player);
     }
 
     internal class AGame : Game
@@ -67,10 +67,66 @@ namespace Bowling.Domain
             AsStack(player).Push(f);
         }
 
-        public int Score()
+        public int CalculateScoreFor(Player player)
         {
-            //JP: TEST THIS
-            throw new NotImplementedException();
+
+            var frames = playerFrames[player];
+
+            var score = 0;
+            foreach (var frame in frames)
+            {
+                var frameScore = 0;
+                Frame nextFrame = null;
+                if (frame.Number <= 9)
+                {
+
+                    switch (frame.Type)
+                    {
+                        case Frame.FrameType.Spare:
+                            nextFrame = GetNextFrame(frames, frame);
+                            frameScore = FrameScoreByKnockedPins(frame) + nextFrame.GetKnockedDownPinsOnTry(IPlayTry.PlayTry.First).KnockedDownPins;
+                            break;
+                        case Frame.FrameType.Strike:
+                            nextFrame = GetNextFrame(frames, frame);
+                            frameScore = FrameScoreByKnockedPins(frame) + FrameScoreByKnockedPins(nextFrame);
+                            break;
+                        case Frame.FrameType.Regular:
+                            frameScore = FrameScoreByKnockedPins(frame);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (frame.Type)
+                    {
+                        case Frame.FrameType.Spare:
+
+                            break;
+                        case Frame.FrameType.Strike:
+                            break;
+                        case Frame.FrameType.Regular:
+                            break;
+                    }
+                }
+
+                score += frameScore;
+
+            }
+
+
+
+            return score;
+
+        }
+
+        private static Frame GetNextFrame(IEnumerable<Frame> frames, Frame frame)
+        {
+            return frames.Single(x => x.Number == frame.Number + 1);
+        }
+
+        private static int FrameScoreByKnockedPins(Frame frame)
+        {
+            return frame.GetAllKnockedDownPinsPerTry().Sum(x => x.KnockedDownPins);
         }
 
         private Stack<Frame> AsStack(Player player)
@@ -89,7 +145,22 @@ namespace Bowling.Domain
                     return stack.Pop();
             }
 
-            return new NormalFrame(currentFrameNumber + 1);
+            Frame newFrame;
+            if (currentFrameNumber<9)
+             newFrame = new NormalFrame(currentFrameNumber + 1);
+            else
+                newFrame = new TenthFrame();
+
+            if (f != null)
+                AsNextFrameSetter(f).SetNextFrameWith(newFrame);
+
+
+            return newFrame;
+        }
+
+        private NextFrameSetter AsNextFrameSetter(Frame f)
+        {
+            return (NextFrameSetter)f;
         }
 
         private void InitializeFrames()

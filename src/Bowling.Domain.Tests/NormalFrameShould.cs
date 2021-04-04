@@ -132,14 +132,25 @@ namespace Bowling.Domain.Tests
             private NormalFrame sut;
 
             [Fact]
-            public void IncreasePlayTryAfterBallIsRolled()
+            public void IncreasePlayTryAfterSpareIsRolled()
             {
                 sut = Utils.BuildNormalFrame();
 
-                var pinsKnockedByRoll = Utils.GetRandomPinsToKnockDown(sut.RemainingPins);
+                var pinsKnockedByRoll = Utils.GetRandomNumberBetween(0, 9);
 
                 sut.Roll(pinsKnockedByRoll);
                 Assert.Equal(IPlayTry.PlayTry.Second, sut.Try);
+            }
+
+            [Fact]
+            public void IncreasePlayTryAfterStrikeIsRolled()
+            {
+                sut = Utils.BuildNormalFrame();
+
+                var pinsKnockedByRoll = 10;
+
+                sut.Roll(pinsKnockedByRoll);
+                Assert.Equal(IPlayTry.PlayTry.None, sut.Try);
             }
 
             [Fact]

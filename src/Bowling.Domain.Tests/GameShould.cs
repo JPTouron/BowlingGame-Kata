@@ -1,6 +1,8 @@
 using Bowling.Domain.Frames;
 using Bowling.Domain.Frames.Base;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -40,6 +42,18 @@ namespace Bowling.Domain.Tests
 
             Assert.Equal(expectedPlayer1PlayedFrames, player1Frames.Count);
             Assert.Equal(expectedPlayer2PlayedFrames, player2Frames.Count);
+        }
+
+        [Theory]
+        [ClassData(typeof(ScoringCalculatorProvider))]
+        public void CalculateScoreProperly(IList<Action<Game, Player>> rollSet, int expectedScore)
+        {
+            var p1 = CreatePlayerOne();
+            sut = CreateAGame(p1);
+
+            rollSet.ToList().ForEach(x => x(sut, p1));
+
+            Assert.Equal(expectedScore, sut.CalculateScoreFor(p1));
         }
 
         [Fact]
@@ -201,19 +215,19 @@ namespace Bowling.Domain.Tests
             Assert.Throws<ArgumentException>(() => sut.GetPlayerFrames(unknownPlayer));
         }
 
-        private static APlayer CreatePlayerOne()
+        private AGame CreateAGame(Player p1 = null, Player p2 = null)
+        {
+            return new AGame(p1 ?? CreatePlayerOne(), p2 ?? CreatePlayerTwo());
+        }
+
+        private APlayer CreatePlayerOne()
         {
             return new APlayer("name1");
         }
 
-        private static APlayer CreatePlayerTwo()
+        private APlayer CreatePlayerTwo()
         {
             return new APlayer("name2");
-        }
-
-        private AGame CreateAGame(Player p1 = null, Player p2 = null)
-        {
-            return new AGame(p1 ?? CreatePlayerOne(), p2 ?? CreatePlayerTwo());
         }
 
         private Frame GetLastPlayedFrameFor(APlayer p1)
@@ -221,6 +235,64 @@ namespace Bowling.Domain.Tests
             var fs = sut.GetPlayerFrames(p1);
             var lastPlayedFrame = fs.Aggregate((x, y) => x.Number > y.Number ? x : y);
             return lastPlayedFrame;
+        }
+
+        private class ScoringCalculatorProvider : IEnumerable<object[]>
+        {
+            public IEnumerator<object[]> GetEnumerator()
+            {
+                yield return NoRollsScoreZero();
+                yield return RollThreeSpares();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            private object[] NoRollsScoreZero()
+            {
+                var expectedScore = 0;
+                var rollsList = new List<Action<Game, Player>>();
+
+                return new object[] { rollsList, expectedScore };
+            }
+
+            private object[] RollThreeSpares()
+            {
+                var rollsList = new List<Action<Game, Player>>();
+
+                rollsList.Add((x, y) => x.Roll(y, 5));
+                rollsList.Add((x, y) => x.Roll(y, 2));
+
+                rollsList.Add((x, y) => x.Roll(y, 3));
+                rollsList.Add((x, y) => x.Roll(y, 5));
+
+                rollsList.Add((x, y) => x.Roll(y, 5));
+                rollsList.Add((x, y) => x.Roll(y, 0));
+
+                rollsList.Add((x, y) => x.Roll(y, 4));
+                rollsList.Add((x, y) => x.Roll(y, 1));
+
+                rollsList.Add((x, y) => x.Roll(y, 9));
+                rollsList.Add((x, y) => x.Roll(y, 1));
+
+                rollsList.Add((x, y) => x.Roll(y, 5));
+                rollsList.Add((x, y) => x.Roll(y, 1));
+
+                rollsList.Add((x, y) => x.Roll(y, 7));
+                rollsList.Add((x, y) => x.Roll(y, 1));
+
+                rollsList.Add((x, y) => x.Roll(y, 10));
+
+                rollsList.Add((x, y) => x.Roll(y, 5));
+                rollsList.Add((x, y) => x.Roll(y, 2));
+
+                rollsList.Add((x, y) => x.Roll(y, 10));
+                rollsList.Add((x, y) => x.Roll(y, 10));
+                rollsList.Add((x, y) => x.Roll(y, 2));
+
+                var expectedScore = 78;
+
+                return new object[] { rollsList, expectedScore };
+            }
         }
     }
 }

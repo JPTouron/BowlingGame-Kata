@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using static Bowling.Domain.Frames.Base.Frame;
 
+//JP: please review SOLID ppls on the code and throw a coverage
+
 namespace Bowling.Domain.Frames.Base
 {
     /// <summary>
@@ -28,6 +30,8 @@ namespace Bowling.Domain.Frames.Base
 
         FrameType Type { get; }
 
+        //int CalculateScore();
+
         IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry();
 
         KnockedPinsOnTry GetKnockedDownPinsOnTry(IPlayTry.PlayTry playTry);
@@ -38,10 +42,23 @@ namespace Bowling.Domain.Frames.Base
         void Roll(int pins);
     }
 
-    //JP: program the tenth frame!
-    internal abstract class BaseFrame : Frame
+    //JP: /!\ this is a sorta hack to go around the fact that i did not design the frame with a link to the next frame in line but the previous one...
+    internal interface NextFrameSetter
     {
+        void SetNextFrameWith(Frame frame);
+    }
+
+    //JP: program the tenth frame!
+    internal abstract class BaseFrame : Frame, NextFrameSetter
+    {
+        protected const int AvailablePins = 10;
         protected IList<PlayTry> tries;
+
+        /// <summary>
+        /// this field is so the current frame can pass into the prev frame the results of each try on this frame
+        /// this is in case the current frame is a spare (pass back the first try) or a strike (pass back the 2 tries)
+        /// </summary>
+        private Frame next;
 
         public BaseFrame(int frameNumber)
         {
@@ -62,17 +79,13 @@ namespace Bowling.Domain.Frames.Base
 
         public int Number { get; }
 
-        public int RemainingPins { get; private set; }
+        public int RemainingPins { get; protected set; }
 
         public abstract IPlayTry.PlayTry Try { get; }
 
         public FrameType Type { get; private set; }
 
-        /// <summary>
-        /// this field is so the current frame can pass into the prev frame the results of each try on this frame
-        /// this is in case the current frame is a spare (pass back the first try) or a strike (pass back the 2 tries)
-        /// </summary>
-        private Frame Previous { get; }
+        //public abstract int CalculateScore();
 
         public IReadOnlyList<KnockedPinsOnTry> GetAllKnockedDownPinsPerTry()
         {
@@ -93,9 +106,16 @@ namespace Bowling.Domain.Frames.Base
 
             RollInternal(pins);
 
-            RemainingPins -= pins;
+            UpdateRemainingPins(pins);
 
             UpdateFrameTypeIfApplicable();
+        }
+
+        protected abstract void UpdateRemainingPins(int pins);
+
+        public void SetNextFrameWith(Frame frame)
+        {
+            next = frame;
         }
 
         protected abstract void InitializePlayTries();
@@ -113,7 +133,7 @@ namespace Bowling.Domain.Frames.Base
 
         private void UpdateFrameTypeIfApplicable()
         {
-            if (RemainingPins == 0 && HasTriesLeft == true)
+            if (RemainingPins == 0 && tries.Single(x => x.TryNumber == (int)IPlayTry.PlayTry.First).KnockedDownPins == AvailablePins)
                 Type = FrameType.Strike;
             else if (RemainingPins == 0 && HasTriesLeft == false)
                 Type = FrameType.Spare;
